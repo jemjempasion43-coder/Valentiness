@@ -1,0 +1,199 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Be My Valentine?</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ffe4e1;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        #container {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(5px);
+            border-radius: 20px;
+            z-index: 10;
+        }
+
+        h1 {
+            color: #d02050;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .buttons {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s ease-out;
+            font-weight: bold;
+        }
+
+        #yesBtn {
+            background-color: #ff4d6d;
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 77, 109, 0.4);
+            z-index: 100;
+        }
+
+        #noBtn {
+            background-color: #888;
+            color: white;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #success-message {
+            color: #d02050;
+            font-size: 3rem;
+            font-weight: bold;
+            animation: heartBeat 1.2s infinite;
+        }
+
+        @keyframes heartBeat {
+            0% { transform: scale(1); }
+            14% { transform: scale(1.1); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.1); }
+            70% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <div id="container">
+        <div id="question-section">
+            <h1 id="main-text">Will you be my valentine?</h1>
+            <div class="buttons">
+                <button id="yesBtn">YES</button>
+                <button id="noBtn">NO</button>
+            </div>
+        </div>
+
+        <div id="success-section" class="hidden">
+            <h1 id="success-message">❤️ iloveyousomuch sweetheart ❤️</h1>
+        </div>
+    </div>
+
+    <script>
+        const yesBtn = document.getElementById('yesBtn');
+        const noBtn = document.getElementById('noBtn');
+        const questionSection = document.getElementById('question-section');
+        const successSection = document.getElementById('success-section');
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Phrases for the NO button
+        const phrases = [
+            "Are you sure?",
+            "Baby u sure?",
+            "babyyyyy",
+            "just say yes baby",
+            "Pretty please?",
+            "Don't be mean!",
+            "I'll buy you food!",
+            "Last chance..."
+        ];
+
+        let phraseIndex = 0;
+        let yesSize = 1.2; 
+
+        noBtn.addEventListener('click', () => {
+            noBtn.innerText = phrases[phraseIndex];
+            phraseIndex = (phraseIndex + 1) % phrases.length;
+            
+            yesSize += 0.6;
+            yesBtn.style.fontSize = `${yesSize}rem`;
+            yesBtn.style.padding = `${15 + (yesSize * 2)}px ${30 + (yesSize * 4)}px`;
+        });
+
+        yesBtn.addEventListener('click', () => {
+            questionSection.classList.add('hidden');
+            successSection.classList.remove('hidden');
+        });
+
+        // Background Animation Logic
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const hearts = [];
+        function createHeart() {
+            return {
+                x: Math.random() * canvas.width,
+                y: canvas.height + 20,
+                size: Math.random() * 15 + 10,
+                speed: Math.random() * 2 + 1,
+                opacity: Math.random() * 0.5 + 0.2
+            };
+        }
+
+        function drawHeart(heart) {
+            ctx.globalAlpha = heart.opacity;
+            ctx.fillStyle = '#ff4d6d';
+            ctx.beginPath();
+            const x = heart.x;
+            const y = heart.y;
+            const s = heart.size;
+            ctx.moveTo(x, y + s / 4);
+            ctx.quadraticCurveTo(x, y, x + s / 4, y);
+            ctx.quadraticCurveTo(x + s / 2, y, x + s / 2, y + s / 4);
+            ctx.quadraticCurveTo(x + s / 2, y, x + s * 3/4, y);
+            ctx.quadraticCurveTo(x + s, y, x + s, y + s / 4);
+            ctx.quadraticCurveTo(x + s, y + s / 2, x + s / 2, y + s * 0.75);
+            ctx.quadraticCurveTo(x, y + s / 2, x, y + s / 4);
+            ctx.fill();
+        }
+
+        function update() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (hearts.length < 50 && Math.random() < 0.1) hearts.push(createHeart());
+            
+            hearts.forEach((heart, index) => {
+                heart.y -= heart.speed;
+                drawHeart(heart);
+                if (heart.y < -50) hearts.splice(index, 1);
+            });
+            requestAnimationFrame(update);
+        }
+
+        window.onresize = () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        };
+
+        update();
+    </script>
+</body>
+</html>
